@@ -16,7 +16,7 @@ root.innerHTML =`
   </div>
 `;
 
-const app = root.first("#app");
+const app = first("#app", root);
 
 // Код, начиная с этого места НЕ меняем
 const wl = new WordList();
@@ -26,4 +26,4 @@ wl.addWord("чай", "вкусный, делает меня человеком")
 wl.addWord("яблоки", "с ананасами");
 wl.addWord("сосисочки", "я — Никита Литвинков!");
 
-root.first('#app').innerHTML = renderWordList(wl);
+app.innerHTML = renderWordList(wl);
