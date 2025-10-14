@@ -1,0 +1,6 @@
+{
+ "6e485405-209a-4fcf-966b-2bc4fc106ca6": "const year = 2025;\nconst month = 5;\n\nconst dogs = 13;\nconst cats = 7;\nconst left = dogs - cats;\n\nconst seconds = 2 * 45 * 60;\nconst steps = (10 - 1) * 32;",
+ "d1df2e3d-d239-490b-9e31-ef2405899bca": "const city = \"Екатеринбург\";\nconst year = \"2025\";\n\nconst place = \"г. \" + city;\nconst last4 = city.slice(-4);\n\nconst tens = year.slice(0, year.indexOf(\"5\"));\nconst ter = city.slice(3, 6);",
+ "e405f5c1-fde2-4926-963b-7f178863c10c": "const numbers = [1, 3, 9, 27, 81];\nconst numbersCopy = [...numbers];\n\nconst last3 = [numbers[4], numbers[3], numbers[2]];\nconst sumLast3 = last3[0] + last3[1] + last3[2];\n\nconst five = [last3[0], last3[1], last3[2], 100, 200];",
+ "2a0326ab-c18a-4995-8803-fdd96d8803b8": "const source = {\n  green: \"зеленый\",\n  red: \"красный\",\n  yellow: \"желтый\"\n};\n\nconst green = source.green;\n\nconst keys = Object.keys(source);\nconst values = Object.values(source);\n\nconst railroad = {\n  ...source,\n  blue: \"синий\"\n};"
+}
