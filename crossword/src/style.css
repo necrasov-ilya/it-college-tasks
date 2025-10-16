@@ -1,3 +1,14 @@
+.word-list-wrapper {
+  display: inline-block;
+}
+
+.word-list-add {
+  margin-bottom: 8px;
+  padding: 4px 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
 .word-list {
   td, th {
     font-size: 24px;
