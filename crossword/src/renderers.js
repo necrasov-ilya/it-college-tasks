@@ -27,7 +27,8 @@ export function renderWordList(wordList) {
       </tbody>
     </table>
   `;
-  
+
+  // Функционал удаления
   queueMicrotask(() => {
     const table = document.querySelector('table.word-list');
     if (!table) return;
