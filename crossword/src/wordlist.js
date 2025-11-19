@@ -6,6 +6,10 @@ export class WordList {
   addWord(word, description) {
     this.words.push({ word, description });
   }
+
+  removeWord(word) {
+    this.words = this.words.filter(w => w.word !== word);
+  }
   
   getWords() {
     return this.words;
