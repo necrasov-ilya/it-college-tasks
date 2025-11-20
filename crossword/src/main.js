@@ -1,39 +1,50 @@
-import './style.css'
+import './style.css';
 import { elementMethods } from './baseline.js';
 import { renderWordList } from './renderers.js';
 import { WordList } from './wordlist.js';
 import { Crossword, renderCrossword } from './crossword.js';
 
+const INITIAL_WORDS = [
+  ['повар', 'такая профессия'],
+  ['чай', 'вкусный, делает меня человеком'],
+  ['яблоки', 'с ананасами'],
+  ['сосисочки', 'я — Никита Литвинков!']
+];
+
 const { first } = elementMethods();
-const root = first('#root');
-root.innerHTML = '<div id="app"></div>';
-const app = first('#app', root);
-
-const wl = new WordList();
-[
-  ["повар", "такая профессия"],
-  ["чай", "вкусный, делает меня человеком"],
-  ["яблоки", "с ананасами"],
-  ["сосисочки", "я — Никита Литвинков!"]
-].forEach(([word, description]) => wl.addWord(word, description));
-
+const app = createAppRoot();
+const wordList = createWordList(INITIAL_WORDS);
 const crossword = new Crossword(10);
-app.innerHTML = renderWordList(wl) + renderCrossword(crossword, wl);
 
-app.addEventListener('click', (event) => {
+renderInitialLayout();
+app.addEventListener('click', handleAppClick);
+
+function createAppRoot() {
+  const root = first('#root');
+  root.innerHTML = '<div id="app"></div>';
+  return first('#app', root);
+}
+
+function createWordList(entries) {
+  const list = new WordList();
+  entries.forEach(([word, description]) => list.addWord(word, description));
+  return list;
+}
+
+function renderInitialLayout() {
+  app.innerHTML = renderWordList(wordList) + renderCrossword(crossword, wordList);
+}
+
+function handleAppClick(event) {
   const cell = event.target.closest('.crossword-cell');
   if (cell) {
     handleCellClick(cell);
     return;
   }
 
-  if (event.target.classList.contains('export-button')) {
+  if (event.target.closest('.export-button')) {
     exportToPDF();
   }
-});
-
-function handleCellClickAlt(cell) {
-  const multiwords = collectWords().filter(w => w.word.includes(' '));
 }
 
 function handleCellClick(cell) {
@@ -43,14 +54,25 @@ function handleCellClick(cell) {
     return;
   }
 
-  const position = { row: Number(cell.dataset.row), col: Number(cell.dataset.col) };
+  const position = {
+    row: Number(cell.dataset.row),
+    col: Number(cell.dataset.col)
+  };
+
   openPlacementModal(words, ({ word, direction }) => {
-    const result = crossword.placeWord(word, position.row, position.col, direction === 'horizontal');
-    if (result.success) {
-      updateGrid();
-    } else {
-      alert(result.error);
+    const placement = crossword.placeWord(
+      word,
+      position.row,
+      position.col,
+      direction === 'horizontal'
+    );
+
+    if (!placement.success) {
+      alert(placement.error);
+      return;
     }
+
+    updateGrid();
   });
 }
 
@@ -102,30 +124,43 @@ function openPlacementModal(words, onPlace) {
 
   cancelButton.addEventListener('click', close);
   overlay.addEventListener('click', (event) => {
-    if (event.target === overlay) close();
+    if (event.target === overlay) {
+      close();
+    }
   });
 }
 
 function updateGrid() {
   const wrapper = app.querySelector('.crossword-wrapper');
   if (wrapper) {
-    wrapper.outerHTML = renderCrossword(crossword, wl);
+    wrapper.outerHTML = renderCrossword(crossword, wordList);
   }
 }
 
 async function exportToPDF() {
-  const doc = new (await import('jspdf')).default();
+  const doc = await createPdfDocument();
+  const afterGridY = drawGrid(doc);
+  writeClues(doc, afterGridY);
+  doc.save('crossword.pdf');
+}
+
+async function createPdfDocument() {
+  const Doc = (await import('jspdf')).default;
+  const doc = new Doc();
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(16);
   doc.text('Кроссворд', 105, 20, { align: 'center' });
+  return doc;
+}
 
-  const grid = crossword.getGrid();
+function drawGrid(doc) {
   const cellSize = 10;
   const startX = 20;
   const startY = 30;
+  const grid = crossword.getGrid();
 
-  for (let row = 0; row < crossword.size; row++) {
-    for (let col = 0; col < crossword.size; col++) {
+  for (let row = 0; row < crossword.size; row += 1) {
+    for (let col = 0; col < crossword.size; col += 1) {
       const x = startX + col * cellSize;
       const y = startY + row * cellSize;
       doc.rect(x, y, cellSize, cellSize);
@@ -136,24 +171,37 @@ async function exportToPDF() {
     }
   }
 
-  const words = wl.getWords();
-  let y = startY + crossword.size * cellSize + 20;
-  [['По горизонтали', true], ['По вертикали', false]].forEach(([title, isHorizontal]) => {
-    const entries = crossword.getPlacedWords().filter((w) => w.isHorizontal === isHorizontal);
-    if (!entries.length) return;
+  return startY + crossword.size * cellSize + 20;
+}
+
+function writeClues(doc, startY) {
+  const words = wordList.getWords();
+  let y = startY;
+
+  [
+    ['По горизонтали', true],
+    ['По вертикали', false]
+  ].forEach(([title, isHorizontal]) => {
+    const entries = crossword.getPlacedWords().filter((word) => word.isHorizontal === isHorizontal);
+    if (!entries.length) {
+      return;
+    }
+
     doc.setFontSize(12);
-    doc.text(title, startX, y);
+    doc.text(title, 20, y);
     y += 10;
+
     doc.setFontSize(10);
     entries.forEach(({ word }) => {
       const data = words.find((item) => item.word === word.toLowerCase());
-      if (data) {
-        doc.text(`• ${word.toLowerCase()}: ${data.description}`, startX, y);
-        y += 7;
+      if (!data) {
+        return;
       }
+
+      doc.text(`• ${word.toLowerCase()}: ${data.description}`, 20, y);
+      y += 7;
     });
+
     y += 5;
   });
-
-  doc.save('crossword.pdf');
 }
