@@ -1,12 +1,11 @@
-.word-list-wrapper {
-  display: inline-block;
+#app {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
 }
 
-.word-list-add {
-  margin-bottom: 8px;
-  padding: 4px 8px;
-  font-size: 16px;
-  cursor: pointer;
+.word-list-wrapper {
+  display: inline-block;
 }
 
 .word-list {
@@ -24,4 +23,68 @@
   tr:nth-child(even) td {
     background-color: #d8dee9;
   }
+}
+
+.crossword-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.crossword-grid {
+  display: inline-grid;
+  grid-template-columns: repeat(10, 40px);
+  grid-template-rows: repeat(10, 40px);
+  border: 2px solid #333;
+}
+
+.crossword-cell {
+  border: 1px solid #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  background-color: white;
+  text-transform: uppercase;
+}
+
+.crossword-info {
+  max-width: 400px;
+}
+
+.crossword-info h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.crossword-info ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.crossword-info li {
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: white;
+  padding: 24px;
+  min-width: 300px;
 }

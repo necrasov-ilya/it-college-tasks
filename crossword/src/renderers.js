@@ -3,13 +3,15 @@ export function renderWordList(wordList) {
   
   let tableHTML = `
     <div class="word-list-wrapper">
-      <button type="button" class="word-list-add">Добавить строку</button>
+      <input type="text" id="new-word-input" placeholder="Слово">
+      <input type="text" id="new-description-input" placeholder="Описание">
+      <button type="button" class="word-list-add">Добавить</button>
       <table class="word-list">
       <thead>
         <tr>
           <th>Слово</th>
           <th>Описание</th>
-          <th></th>
+          <th>Действия</th>
         </tr>
       </thead>
       <tbody>
@@ -18,9 +20,9 @@ export function renderWordList(wordList) {
   words.forEach(({ word, description }) => {
     tableHTML += `
         <tr>
-          <td class="editable">${word}</td>
-          <td class="editable">${description}</td>
-          <td><button class="row-delete" aria-label="Удалить строку" title="Удалить">✕</button></td>
+          <td>${word}</td>
+          <td>${description}</td>
+          <td><button class="row-delete">Удалить</button></td>
         </tr>
     `;
   });
@@ -31,7 +33,6 @@ export function renderWordList(wordList) {
   </div>
   `;
 
-  // Функционал удаления + inline-редактирования
   queueMicrotask(() => {
     const table = document.querySelector('table.word-list');
     if (!table) return;
@@ -42,51 +43,44 @@ export function renderWordList(wordList) {
       const btn = e.target.closest('button.row-delete');
       if (!btn) return;
       const row = btn.closest('tr');
-      if (row) row.remove();
-    });
-
-    table.addEventListener('dblclick', (e) => {
-      const cell = e.target.closest('td.editable');
-      if (!cell || cell.isContentEditable) return;
-      const original = cell.textContent;
-      const blur = () => {
-        cell.contentEditable = 'false';
-        cell.removeEventListener('blur', blur);
-        cell.removeEventListener('keydown', keydown);
-      };
-      const keydown = (event) => {
-        if (event.key === 'Enter') {
-          event.preventDefault();
-          cell.blur();
-        } else if (event.key === 'Escape') {
-          event.preventDefault();
-          cell.textContent = original;
-          cell.blur();
-        }
-      };
-      cell.contentEditable = 'true';
-      cell.focus();
-      cell.addEventListener('blur', blur);
-      cell.addEventListener('keydown', keydown);
+      if (row) {
+        row.remove();
+        const event = new CustomEvent('wordListChanged');
+        document.dispatchEvent(event);
+      }
     });
 
     const addButton = document.querySelector('.word-list-add');
     if (addButton && !addButton._handlerAttached) {
       addButton._handlerAttached = true;
       addButton.addEventListener('click', () => {
+        const wordInput = document.querySelector('#new-word-input');
+        const descInput = document.querySelector('#new-description-input');
+        
+        const word = wordInput.value.trim();
+        const description = descInput.value.trim();
+        
+        if (!word || !description) {
+          alert('Заполните оба поля!');
+          return;
+        }
+        
         const tbody = table.querySelector('tbody');
         if (!tbody) return;
+        
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td class="editable">Новое слово</td>
-          <td class="editable">Новое описание</td>
-          <td><button class="row-delete" aria-label="Удалить строку" title="Удалить">✕</button></td>
+          <td>${word}</td>
+          <td>${description}</td>
+          <td><button class="row-delete">Удалить</button></td>
         `;
         tbody.appendChild(row);
-        const firstCell = row.querySelector('td.editable');
-        if (firstCell) {
-          firstCell.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
-        }
+        
+        wordInput.value = '';
+        descInput.value = '';
+        
+        const event = new CustomEvent('wordListChanged');
+        document.dispatchEvent(event);
       });
     }
   });
