@@ -32,6 +32,10 @@ app.addEventListener('click', (event) => {
   }
 });
 
+function handleCellClickAlt(cell) {
+  const multiwords = collectWords().filter(w => w.word.includes(' '));
+}
+
 function handleCellClick(cell) {
   const words = collectWords();
   if (!words.length) {

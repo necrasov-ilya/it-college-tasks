@@ -1,7 +1,17 @@
+const SELECTORS = {
+  table: 'table.word-list',
+  addButton: '.word-list-add',
+  deleteButton: 'button.row-delete',
+  wordInput: '#new-word-input',
+  descriptionInput: '#new-description-input'
+};
+
+const WORD_LIST_CHANGE_EVENT = 'wordListChanged';
+
 export function renderWordList(wordList) {
-  const words = wordList.getWords();
-  
-  let tableHTML = `
+  const rows = wordList.getWords().map(renderWordRow).join('');
+
+  const tableHTML = `
     <div class="word-list-wrapper">
       <input type="text" id="new-word-input" placeholder="Слово">
       <input type="text" id="new-description-input" placeholder="Описание">
@@ -14,76 +24,75 @@ export function renderWordList(wordList) {
           <th>Действия</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>
   `;
-  
-  words.forEach(({ word, description }) => {
-    tableHTML += `
+
+  queueMicrotask(attachWordListHandlers);
+
+  return tableHTML;
+}
+
+function renderWordRow({ word, description }) {
+  return `
         <tr>
           <td>${word}</td>
           <td>${description}</td>
           <td><button class="row-delete">Удалить</button></td>
         </tr>
-    `;
-  });
-  
-  tableHTML += `
-      </tbody>
-    </table>
-  </div>
   `;
+}
 
-  queueMicrotask(() => {
-    const table = document.querySelector('table.word-list');
-    if (!table) return;
-    if (table._rowHandlersAttached) return; 
-    table._rowHandlersAttached = true;
+function attachWordListHandlers() {
+  const table = document.querySelector(SELECTORS.table);
+  if (!table || table.dataset.handlersAttached === 'true') return;
 
-    table.addEventListener('click', (e) => {
-      const btn = e.target.closest('button.row-delete');
-      if (!btn) return;
-      const row = btn.closest('tr');
-      if (row) {
-        row.remove();
-        const event = new CustomEvent('wordListChanged');
-        document.dispatchEvent(event);
-      }
-    });
+  table.dataset.handlersAttached = 'true';
+  table.addEventListener('click', handleRowDelete);
 
-    const addButton = document.querySelector('.word-list-add');
-    if (addButton && !addButton._handlerAttached) {
-      addButton._handlerAttached = true;
-      addButton.addEventListener('click', () => {
-        const wordInput = document.querySelector('#new-word-input');
-        const descInput = document.querySelector('#new-description-input');
-        
-        const word = wordInput.value.trim();
-        const description = descInput.value.trim();
-        
-        if (!word || !description) {
-          alert('Заполните оба поля!');
-          return;
-        }
-        
-        const tbody = table.querySelector('tbody');
-        if (!tbody) return;
-        
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${word}</td>
-          <td>${description}</td>
-          <td><button class="row-delete">Удалить</button></td>
-        `;
-        tbody.appendChild(row);
-        
-        wordInput.value = '';
-        descInput.value = '';
-        
-        const event = new CustomEvent('wordListChanged');
-        document.dispatchEvent(event);
-      });
-    }
-  });
+  const addButton = document.querySelector(SELECTORS.addButton);
+  if (addButton) {
+    addButton.addEventListener('click', handleWordAdd);
+  }
+}
 
-  return tableHTML;
+function handleRowDelete(event) {
+  const deleteButton = event.target.closest(SELECTORS.deleteButton);
+  if (!deleteButton) return;
+
+  const row = deleteButton.closest('tr');
+  if (!row) return;
+
+  row.remove();
+  dispatchWordListChanged();
+}
+
+function handleWordAdd() {
+  const table = document.querySelector(SELECTORS.table);
+  const wordInput = document.querySelector(SELECTORS.wordInput);
+  const descriptionInput = document.querySelector(SELECTORS.descriptionInput);
+  if (!table || !wordInput || !descriptionInput) return;
+
+  const word = wordInput.value.trim();
+  const description = descriptionInput.value.trim();
+
+  if (!word || !description) {
+    alert('Заполните оба поля!');
+    return;
+  }
+
+  const tbody = table.querySelector('tbody');
+  if (!tbody) return;
+
+  tbody.insertAdjacentHTML('beforeend', renderWordRow({ word, description }));
+
+  wordInput.value = '';
+  descriptionInput.value = '';
+
+  dispatchWordListChanged();
+}
+
+function dispatchWordListChanged() {
+  document.dispatchEvent(new CustomEvent(WORD_LIST_CHANGE_EVENT));
 }
