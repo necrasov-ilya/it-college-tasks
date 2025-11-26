@@ -3,7 +3,6 @@ export function renderWordList(wordList) {
   
   let tableHTML = `
     <div class="word-list-wrapper">
-      <button type="button" class="word-list-add">Добавить строку</button>
       <table class="word-list">
       <thead>
         <tr>
@@ -70,26 +69,7 @@ export function renderWordList(wordList) {
       cell.addEventListener('keydown', keydown);
     });
 
-    const addButton = document.querySelector('.word-list-add');
-    if (addButton && !addButton._handlerAttached) {
-      addButton._handlerAttached = true;
-      addButton.addEventListener('click', () => {
-        const tbody = table.querySelector('tbody');
-        if (!tbody) return;
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td class="editable">Новое слово</td>
-          <td class="editable">Новое описание</td>
-          <td><button class="row-delete" aria-label="Удалить строку" title="Удалить">✕</button></td>
-        `;
-        tbody.appendChild(row);
-        const firstCell = row.querySelector('td.editable');
-        if (firstCell) {
-          firstCell.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
-        }
-      });
-    }
-  });
+    });
 
   return tableHTML;
 }
