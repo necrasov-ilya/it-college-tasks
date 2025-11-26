@@ -157,9 +157,14 @@ wordOptions.addEventListener('click', (e) => {
   const option = e.target.closest('.word-option');
   if (!option) return;
   const cells = document.querySelectorAll('.word-list tbody tr')[option.dataset.index].querySelectorAll('td.editable');
-  const word = cells[0].textContent;
-  const description = cells[1].textContent;
+  const word = cells[0].textContent.trim();
+  const description = cells[1].textContent.trim();
   if (!selectedCell) return;
+  if (!word.length) {
+    modal.style.display = 'none';
+    alert('Word cannot be empty.');
+    return;
+  }
 
   const validation = canPlaceWord(word, selectedCell, selectedDirection);
   if (!validation.ok) {
@@ -182,11 +187,17 @@ document.getElementById('modal-close').addEventListener('click', () => modal.sty
 document.getElementById('add-word-btn').addEventListener('click', () => {
   const wordInput = document.getElementById('new-word');
   const descInput = document.getElementById('new-desc');
+  const word = wordInput.value.trim();
+  const desc = descInput.value.trim();
+  if (!word || !desc) {
+    alert('Both word and description are required.');
+    return;
+  }
   const tbody = document.querySelector('.word-list tbody');
   const row = document.createElement('tr');
   row.innerHTML = `
-    <td class="editable">${wordInput.value.trim()}</td>
-    <td class="editable">${descInput.value.trim()}</td>
+    <td class="editable">${word}</td>
+    <td class="editable">${desc}</td>
     <td><button class="row-delete" aria-label="Удалить строку" title="Удалить">✕</button></td>
   `;
   tbody.appendChild(row);
