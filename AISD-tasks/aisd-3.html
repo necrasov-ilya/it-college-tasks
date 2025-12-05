@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сумма всех элементов с доп. условием</title>
+</head>
+<body>
+    <input type="text" id="input" placeholder="Введите числа через пробел">
+    <button onclick="calc()">Вычислить</button>
+    <p id="result"></p>
+
+    <script>
+
+        function calc() {
+            const arr = document.getElementById('input').value.split(' ').map(Number); 
+            const sum = arr.reduce((accuracy, value, index) => index % 2 === 0 ? accuracy + value : accuracy, 0);
+            document.getElementById('result').textContent = 'Сумма элементов на четных позициях: ' + sum;
+        }
+
+    </script>
+</body>
+</html>
