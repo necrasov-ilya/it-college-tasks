@@ -10,13 +10,40 @@
     <button onclick="calc()">Вычислить</button>
     <p id="result"></p>
 
+    <input type="text" id="input__2" placeholder="Введите числа через пробел | Способ 2"> 
+    <button onclick="calc__2()">Вычислить 2</button>
+    <p id="result__2"></p>
+
+    <input type="text" id="input__3" placeholder="Введите числа через пробел | Способ дешёвый (3)">
+    <button onclick="calc__3()">Вычислить 3</button>
+    <p id="result__3"></p>
+
+
     <script>
 
         function calc() {
             const arr = document.getElementById('input').value.split(' ').map(Number); 
             const sum = arr.reduce((accuracy, value, index) => index % 2 === 0 ? accuracy + value : accuracy, 0);
             document.getElementById('result').textContent = 'Сумма элементов на четных позициях: ' + sum;
+    }
+
+        function calc__2() {
+        const arr = document.getElementById('input__2').value.split(' ').map(Number);
+        let sum = 0
+
+        for (let i = 0; i < arr.length; i += 2) {
+            sum += arr[i];
         }
+        document.getElementById('result__2').textContent = 'Сумма элементов на четных позициях, решенная способом 2' + sum;
+        
+    }
+
+    function calc__3() {
+        const arr = document.getElementById("input__3").value.split(" ").map(Number);
+        // const sum = arr.reduce((accuracy, value, index) => index % 2 === 0 ? accuracy + value : accuracy, 0);
+        const sum = arr.reduce((accuracy, value, index) => (index & 1) === 0 ? accuracy + value : accuracy, 0)
+        document.getElementById('result__3').textContent = 'Сумма элементов на четных позициях: ' + sum;
+    }
 
     </script>
 </body>
